@@ -31,6 +31,31 @@
       line-height: 1.5;
       -webkit-font-smoothing: antialiased;
     }
+    
+    /* Loading Indicator */
+    #loader {
+      position: fixed;
+      top: 0; left: 0; right: 0; height: 4px;
+      background: #eee;
+      z-index: 2000;
+      display: none;
+      overflow: hidden;
+    }
+    #loader::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; height: 100%;
+      width: 30%;
+      background: var(--accent);
+      animation: loading 1.5s infinite ease-in-out;
+    }
+    @keyframes loading {
+      0% { left: -30%; }
+      100% { left: 100%; }
+    }
+    body.is-loading #loader { display: block; }
+    body.is-loading main { opacity: 0.5; pointer-events: none; }
+
     header {
       padding: 60px 80px 40px;
       display: flex;
@@ -72,11 +97,9 @@
       transition: all 0.2s;
     }
     button:hover { background: #e8e8ed; }
-    button.active { background: var(--ink); color: #fff; border-color: var(--ink); }
-    .datebox { display: none; }
-    .datebox.active { display: flex; }
+    button.active { background: var(--ink) !important; color: #fff !important; border-color: var(--ink) !important; }
 
-    main { padding: 0 80px 80px; }
+    main { padding: 0 80px 80px; transition: opacity 0.3s; }
     
     .summary-bar {
       display: grid;
@@ -113,7 +136,7 @@
       bottom: 10px;
       left: 10px;
       right: 10px;
-      background: rgba(0,0,0,0.85);
+      background: rgba(0,0,0,0.9);
       backdrop-filter: blur(8px);
       color: #fff;
       padding: 12px;
@@ -142,7 +165,7 @@
     h2 { font-size: 28px; font-weight: 700; margin: 0; text-transform: uppercase; letter-spacing: -0.02em; }
     .header-controls { display: flex; gap: 12px; align-items: center; }
     .view-toggles { display: flex; gap: 4px; background: #f5f5f7; padding: 4px; border-radius: 8px; }
-    .view-toggle { padding: 4px 12px; font-size: 11px; font-weight: 700; border-radius: 4px; border: none; background: transparent; }
+    .view-toggle { padding: 4px 12px; font-size: 11px; font-weight: 700; border-radius: 4px; border: none; background: transparent; cursor: pointer; color: var(--ink); }
     .view-toggle.active { background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
 
     .dashboard-grid {
@@ -164,30 +187,31 @@
     .data-bar-fill { height: 100%; border-radius: 4px; }
     .data-value { font-size: 13px; font-weight: 700; color: var(--muted); }
 
-    /* Treemap Mode */
+    /* Treemap Mode - Proportional Flexbox */
     .treemap-container { 
-      display: grid; 
-      grid-template-columns: repeat(12, 1fr); 
-      grid-auto-rows: minmax(100px, auto);
-      gap: 8px; 
+      display: flex; 
+      flex-wrap: wrap;
+      gap: 4px; 
       border-radius: 12px; 
       overflow: hidden; 
       height: 400px;
+      width: 100%;
     }
     .treemap-item { 
       position: relative; 
       cursor: pointer; 
       overflow: hidden; 
-      border-radius: 8px;
-      transition: transform 0.2s;
+      border-radius: 4px;
+      transition: all 0.2s;
+      min-height: 80px;
     }
-    .treemap-item:hover { transform: scale(0.98); }
+    .treemap-item:hover { z-index: 5; box-shadow: 0 0 20px rgba(0,0,0,0.2); transform: scale(0.99); }
     .treemap-label { 
       position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; 
       padding: 12px; color: #fff; text-align: center; font-size: 13px; font-weight: 700;
-      background: rgba(0,0,0,0.3); text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+      background: rgba(0,0,0,0.1); transition: background 0.2s;
     }
-    .treemap-item:hover .treemap-label { background: rgba(0,0,0,0.1); }
+    .treemap-item:hover .treemap-label { background: rgba(0,0,0,0); }
 
     .cover-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 20px; }
     .cover-item { position: relative; aspect-ratio: 1; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.08); transition: transform 0.2s; }
@@ -214,6 +238,8 @@
   </style>
 </head>
 <body>
+
+<div id="loader"></div>
 
 <div id="login">
   <div class="login-box">
@@ -418,6 +444,7 @@ async function getDominantColor(imgUrl) {
 }
 
 function findArtistImage(artistName) {
+  if (!currentData || !currentData.topAlbums) return null;
   const album = currentData.topAlbums.find(a => a.label.toLowerCase().endsWith(` - ${artistName.toLowerCase()}`));
   return album ? album.image : null;
 }
@@ -434,7 +461,7 @@ async function renderSection(section, rows, key = 'minutes') {
       const v = Number(r[key]) || 0;
       const pct = (v / max) * 100;
       const img = section === 'artists' ? findArtistImage(r.label) : r.image;
-      const color = section === 'genres' || section === 'subgenres' ? getHashColor(r.label) : await getDominantColor(img);
+      const color = (section === 'genres' || section === 'subgenres') ? getHashColor(r.label) : await getDominantColor(img);
       container.insertAdjacentHTML('beforeend', `
         <div class="data-row">
           <div class="data-label">${esc(r.label)}</div>
@@ -448,15 +475,14 @@ async function renderSection(section, rows, key = 'minutes') {
     const treemap = document.createElement('div');
     treemap.className = 'treemap-container';
     
-    for (const [i, r] of rows.slice(0, 12).entries()) {
+    for (const r of rows.slice(0, 12)) {
       const v = Number(r[key]) || 0;
-      const weight = (v / total) * 100;
+      const weight = (v / total);
       const img = section === 'artists' ? findArtistImage(r.label) : r.image;
-      const color = section === 'genres' || section === 'subgenres' ? getHashColor(r.label) : await getDominantColor(img);
-      const span = weight > 15 ? 6 : weight > 8 ? 4 : weight > 4 ? 3 : 2;
+      const color = (section === 'genres' || section === 'subgenres') ? getHashColor(r.label) : await getDominantColor(img);
       
       treemap.insertAdjacentHTML('beforeend', `
-        <div class="treemap-item" style="grid-column: span ${span}; background: ${color} url(${img || ''}) center/cover; background-blend-mode: overlay;">
+        <div class="treemap-item" style="flex: ${weight} 0 auto; background: ${color}; width: ${weight * 100}%; min-width: 80px;">
           <div class="treemap-label">
             <strong>${esc(r.label)}</strong>
             <span>${key === 'minutes' ? formatMinutes(v) : nf.format(v)}</span>
@@ -488,11 +514,10 @@ function renderHero(topTracks) {
   const seen = new Set();
   const albums = [];
   
-  // Use topAlbums for better metadata
   (currentData.topAlbums || []).forEach(a => {
-    if (a.image && !seen.has(a.image)) {
-      seen.add(a.image);
-      const [albumName] = a.label.split(' - ');
+    const [albumName] = a.label.split(' - ');
+    if (a.image && !seen.has(albumName)) {
+      seen.add(albumName);
       albums.push({
         image: a.image,
         album: albumName,
@@ -501,9 +526,8 @@ function renderHero(topTracks) {
     }
   });
 
-  // Fill 24 covers (3 rows of 8)
   const display = albums.slice(0, 24);
-  while (display.length < 24 && display.length > 0) display.push(display[display.length % display.length]);
+  while (display.length < 24 && display.length > 0) display.push(display[display.length % albums.length]);
 
   display.forEach(a => {
     const tracksHtml = a.tracks.map(t => `<li>${esc(t)}</li>`).join('');
@@ -545,7 +569,7 @@ function updateChart(rows) {
     options: {
       responsive: true,
       maintainAspectRatio: false,
-      interaction: { mode: 'index', intersect: false },
+      interaction: { mode: 'nearest', intersect: true },
       plugins: {
         legend: { position: 'bottom', labels: { font: { family: 'Google Sans', weight: 'bold' } } },
         tooltip: {
@@ -566,12 +590,13 @@ function updateChart(rows) {
 }
 
 async function load() {
+  document.body.classList.add('is-loading');
   const params = new URLSearchParams({ period, tz: $('tz').value, dimension: $('dimension').value });
   if (period === 'custom') { params.set('start', $('start').value); params.set('end', $('end').value); }
 
   try {
     const res = await fetch(API + '?' + params, { headers: { 'x-dashboard-password': dashPass } });
-    if (res.status === 401) { $('login').classList.remove('hidden'); return; }
+    if (res.status === 401) { $('login').classList.remove('hidden'); document.body.classList.remove('is-loading'); return; }
     
     currentData = await res.json();
     const s = currentData.summary;
@@ -584,7 +609,7 @@ async function load() {
 
     renderHero(currentData.topTracks);
     updateChart(currentData.graph.rows || []);
-    refreshDisplays();
+    await refreshDisplays();
 
     $('recent').innerHTML = (currentData.recent || []).map(r => `
       <tr>
@@ -595,15 +620,16 @@ async function load() {
       </tr>
     `).join('');
   } catch (err) { console.error(err); }
+  document.body.classList.remove('is-loading');
 }
 
-function refreshDisplays() {
+async function refreshDisplays() {
   if (!currentData) return;
-  renderSection('artists', currentData.topArtists);
-  renderSection('tracks', currentData.topTracks);
-  renderSection('albums', currentData.topAlbums);
-  renderSection('genres', currentData.topGenres);
-  renderSection('subgenres', currentData.topSubgenres);
+  const sections = ['artists', 'tracks', 'albums', 'genres', 'subgenres'];
+  for (const s of sections) {
+    const rows = s === 'subgenres' ? currentData.topSubgenres : currentData[`top${s.charAt(0).toUpperCase() + s.slice(1)}`];
+    await renderSection(s, rows);
+  }
 }
 
 document.querySelectorAll('.view-toggle').forEach(btn => {
