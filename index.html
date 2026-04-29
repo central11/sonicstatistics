@@ -1,0 +1,546 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>SonicStatistics</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root {
+      --paper: #ffffff;
+      --ink: #000000;
+      --accent: #F04E37;
+      --muted: #666666;
+      --grid: #000000;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--paper);
+      color: var(--ink);
+      font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+      line-height: 1.2;
+    }
+    header {
+      padding: 40px 40px 20px;
+      border-bottom: 4px solid var(--ink);
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+    }
+    h1 {
+      margin: 0;
+      font-size: 80px;
+      font-weight: 900;
+      letter-spacing: -0.04em;
+      line-height: 0.8;
+      text-transform: uppercase;
+    }
+    .deck {
+      color: var(--accent);
+      font-size: 14px;
+      font-weight: 900;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+    .controls {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 12px;
+    }
+    .row { display: flex; gap: 8px; }
+    button, select, input {
+      border: 2px solid var(--ink);
+      background: #fff;
+      font: inherit;
+      font-weight: 700;
+      padding: 6px 12px;
+      text-transform: uppercase;
+      font-size: 12px;
+      cursor: pointer;
+    }
+    button.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+    .datebox { display: none; }
+    .datebox.active { display: flex; }
+
+    main { padding: 0 40px 40px; }
+    
+    /* Stats Row */
+    .summary-bar {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      border-bottom: 2px solid var(--ink);
+      padding: 20px 0;
+      margin-bottom: 40px;
+    }
+    .stat-item { border-left: 1px solid var(--ink); padding-left: 20px; }
+    .stat-item:first-child { border-left: none; padding-left: 0; }
+    .stat-label { font-size: 12px; font-weight: 900; text-transform: uppercase; color: var(--muted); display: block; }
+    .stat-value { font-size: 32px; font-weight: 900; letter-spacing: -0.02em; }
+
+    /* Hero Covers */
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 40px;
+      margin-bottom: 40px;
+    }
+    .covers-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+      gap: 10px;
+    }
+    .cover-wrapper {
+      position: relative;
+      aspect-ratio: 1;
+      border: 1px solid var(--ink);
+      background: #eee;
+      cursor: crosshair;
+    }
+    .cover-img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .cover-tooltip {
+      position: absolute;
+      bottom: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--ink);
+      color: #fff;
+      padding: 10px;
+      font-size: 11px;
+      width: 200px;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.2s;
+      z-index: 100;
+      margin-bottom: 10px;
+    }
+    .cover-tooltip::after {
+      content: '';
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      margin-left: -5px;
+      border-width: 5px;
+      border-style: solid;
+      border-color: var(--ink) transparent transparent transparent;
+    }
+    .cover-wrapper:hover .cover-tooltip { opacity: 1; }
+    .tooltip-title { font-weight: 900; margin-bottom: 5px; display: block; border-bottom: 1px solid #444; padding-bottom: 3px; }
+    .tooltip-tracks { margin: 0; padding: 0; list-style: none; }
+    .tooltip-tracks li { margin-bottom: 2px; }
+
+    /* Grid Layout */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 40px;
+    }
+    .panel { grid-column: span 6; }
+    .panel.full { grid-column: span 12; }
+    h2 {
+      font-size: 24px;
+      font-weight: 900;
+      text-transform: uppercase;
+      margin: 0 0 20px;
+      border-top: 4px solid var(--ink);
+      padding-top: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .chart-container { height: 400px; position: relative; }
+
+    /* Lists */
+    .data-list { display: flex; flex-direction: column; gap: 8px; }
+    .data-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: flex-end;
+      gap: 10px;
+    }
+    .data-label {
+      font-weight: 700;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .data-bar-bg { height: 12px; background: #eee; grid-column: 1 / -1; margin-top: 2px; }
+    .data-bar-fill { height: 100%; background: var(--accent); }
+    .data-value { font-size: 12px; font-weight: 900; }
+
+    .pills { display: flex; flex-wrap: wrap; gap: 8px; }
+    .pill {
+      border: 2px solid var(--ink);
+      padding: 4px 10px;
+      font-weight: 900;
+      font-size: 13px;
+      background: #fff;
+    }
+
+    table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    th { text-align: left; text-transform: uppercase; font-weight: 900; padding: 8px 4px; border-bottom: 2px solid var(--ink); }
+    td { padding: 8px 4px; border-bottom: 1px solid #ddd; }
+
+    #login {
+      position: fixed;
+      inset: 0;
+      background: var(--paper);
+      z-index: 1000;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    #login.hidden { display: none; }
+    .login-box { width: 400px; border-top: 12px solid var(--accent); padding: 40px; border-bottom: 4px solid var(--ink); }
+    .login-box h2 { border: none; padding: 0; font-size: 48px; margin-bottom: 20px; }
+    input[type="password"] { width: 100%; margin-bottom: 20px; padding: 12px; font-size: 18px; }
+    .login-box button { width: 100%; padding: 12px; font-size: 18px; background: var(--ink); color: #fff; }
+
+    @media (max-width: 1024px) {
+      header { flex-direction: column; align-items: flex-start; gap: 20px; }
+      .summary-bar { grid-template-columns: repeat(2, 1fr); gap: 20px; }
+      .panel { grid-column: span 12; }
+    }
+  </style>
+</head>
+<body>
+
+<div id="login">
+  <div class="login-box">
+    <p class="deck">Access Restricted</p>
+    <h2>Sonic<br>Statistics</h2>
+    <form id="loginForm">
+      <input id="password" type="password" placeholder="PASSWORD" autofocus>
+      <button>ENTER</button>
+      <p id="loginError" style="color: var(--accent); font-weight: 900; margin-top: 10px;"></p>
+    </form>
+  </div>
+</div>
+
+<header>
+  <div>
+    <p class="deck">Private Listening Archive / v2.0</p>
+    <h1>SonicStatistics</h1>
+  </div>
+  <div class="controls">
+    <div class="row" id="periods"></div>
+    <div class="row datebox" id="datebox">
+      <input id="start" type="date">
+      <input id="end" type="date">
+      <button id="applyCustom">APPLY</button>
+    </div>
+    <div class="row">
+      <select id="tz">
+        <option value="America/Chicago">CENTRAL</option>
+        <option value="America/New_York">EASTERN</option>
+        <option value="America/Los_Angeles">PACIFIC</option>
+        <option value="UTC">UTC</option>
+      </select>
+      <select id="dimension">
+        <option value="artist">ARTIST OVER TIME</option>
+        <option value="genre">GENRE OVER TIME</option>
+        <option value="subgenre">SUBGENRE OVER TIME</option>
+        <option value="track">TRACK OVER TIME</option>
+        <option value="album">ALBUM OVER TIME</option>
+        <option value="source">SOURCE OVER TIME</option>
+      </select>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section class="summary-bar">
+    <article class="stat-item">
+      <span class="stat-label">Hours Listened</span>
+      <strong class="stat-value" id="hoursVal">0</strong>
+    </article>
+    <article class="stat-item">
+      <span class="stat-label">Streams</span>
+      <strong class="stat-value" id="plays">0</strong>
+    </article>
+    <article class="stat-item">
+      <span class="stat-label">Distinct Tracks</span>
+      <strong class="stat-value" id="tracks">0</strong>
+    </article>
+    <article class="stat-item">
+      <span class="stat-label">Last Listen</span>
+      <strong class="stat-value" id="last">—</strong>
+    </article>
+    <article class="stat-item">
+      <span class="stat-label">Period</span>
+      <strong class="stat-value" id="rangeLabel">4 WEEKS</strong>
+    </article>
+  </section>
+
+  <section class="hero-grid">
+    <div class="covers-container" id="covers"></div>
+  </section>
+
+  <section class="dashboard-grid">
+    <article class="panel full">
+      <h2>Change Over Time</h2>
+      <div class="chart-container">
+        <canvas id="timeChart"></canvas>
+      </div>
+    </article>
+
+    <article class="panel">
+      <h2>Top Artists</h2>
+      <div id="artists" class="data-list"></div>
+    </article>
+
+    <article class="panel">
+      <h2>Top Tracks</h2>
+      <div id="tracksList" class="data-list"></div>
+    </article>
+
+    <article class="panel">
+      <h2>Top Albums</h2>
+      <div id="albums" class="data-list"></div>
+    </article>
+
+    <article class="panel">
+      <h2>Genre Families</h2>
+      <div id="genres" class="pills"></div>
+    </article>
+
+    <article class="panel">
+      <h2>Subgenres</h2>
+      <div id="subgenres" class="data-list"></div>
+    </article>
+
+    <article class="panel full">
+      <h2>Recent Activity</h2>
+      <div style="max-height: 500px; overflow: auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>Timestamp</th>
+              <th>Track</th>
+              <th>Artist</th>
+              <th>Album</th>
+            </tr>
+          </thead>
+          <tbody id="recent"></tbody>
+        </table>
+      </div>
+    </article>
+  </section>
+</main>
+
+<script>
+const API = 'https://qmfzabawnpmzzirrplom.supabase.co/functions/v1/sonic-dashboard/api';
+const $ = id => document.getElementById(id);
+const nf = new Intl.NumberFormat();
+let period = '4w';
+let dashPass = localStorage.getItem('sonicPass') || '';
+let chart = null;
+
+const periods = [
+  ['4w', '4 Weeks'], ['6m', '6 Months'], ['1y', '1 Year'],
+  ['this_year', 'This Year'], ['last_year', 'Last Year'],
+  ['last_two_years', 'Last 2 Years'], ['all', 'All Time'], ['custom', 'Custom']
+];
+
+periods.forEach(([v, l]) => {
+  const b = document.createElement('button');
+  b.textContent = l;
+  b.onclick = () => {
+    period = v;
+    document.querySelectorAll('#periods button').forEach(x => x.classList.toggle('active', x === b));
+    $('datebox').classList.toggle('active', v === 'custom');
+    if (v !== 'custom') load();
+  };
+  if (v === '4w') b.classList.add('active');
+  $('periods').appendChild(b);
+});
+
+function formatMinutes(v) {
+  v = Number(v) || 0;
+  return v > 60 ? nf.format(Math.round(v / 60)) + 'h' : nf.format(Math.round(v)) + 'm';
+}
+
+function esc(s) {
+  return String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+}
+
+function renderList(id, rows, key = 'minutes') {
+  const e = $(id);
+  e.innerHTML = '';
+  const max = Math.max(...(rows || []).map(r => Number(r[key]) || 0), 1);
+  (rows || []).slice(0, 10).forEach(r => {
+    const v = Number(r[key]) || 0;
+    const pct = Math.max(1, (v / max) * 100);
+    e.insertAdjacentHTML('beforeend', `
+      <div class="data-row">
+        <div class="data-label" title="${esc(r.label)}">${esc(r.label)}</div>
+        <div class="data-value">${key === 'minutes' ? formatMinutes(v) : nf.format(v)}</div>
+        <div class="data-bar-bg"><div class="data-bar-fill" style="width: ${pct}%"></div></div>
+      </div>
+    `);
+  });
+}
+
+function renderCovers(topTracks) {
+  const container = $('covers');
+  container.innerHTML = '';
+  
+  // Deduplicate by album image
+  const seen = new Set();
+  const albums = [];
+  
+  (topTracks || []).forEach(t => {
+    if (t.image && !seen.has(t.image)) {
+      seen.add(t.image);
+      albums.push({
+        image: t.image,
+        album: t.album_name || t.label,
+        tracks: (topTracks || []).filter(x => x.image === t.image).slice(0, 5)
+      });
+    }
+  });
+
+  albums.slice(0, 15).forEach(a => {
+    const trackList = a.tracks.map(t => `<li>${esc(t.label)}</li>`).join('');
+    container.insertAdjacentHTML('beforeend', `
+      <div class="cover-wrapper">
+        <img src="${a.image}" class="cover-img" alt="${esc(a.album)}">
+        <div class="cover-tooltip">
+          <span class="tooltip-title">${esc(a.album)}</span>
+          <ul class="tooltip-tracks">${trackList}</ul>
+        </div>
+      </div>
+    `);
+  });
+}
+
+function updateChart(rows) {
+  const ctx = $('timeChart').getContext('2d');
+  const labels = [...new Set(rows.map(r => r.bucket))].sort();
+  const seriesNames = [...new Set(rows.map(r => r.label))];
+  
+  const datasets = seriesNames.map((name, i) => {
+    const colors = ['#F04E37', '#000000', '#666666', '#999999', '#CCCCCC'];
+    return {
+      label: name,
+      data: labels.map(l => {
+        const row = rows.find(r => r.bucket === l && r.label === name);
+        return row ? row.minutes : 0;
+      }),
+      borderColor: colors[i % colors.length],
+      backgroundColor: colors[i % colors.length],
+      borderWidth: 3,
+      pointRadius: 0,
+      tension: 0.1
+    };
+  });
+
+  if (chart) chart.destroy();
+  
+  chart = new Chart(ctx, {
+    type: 'line',
+    data: { labels, datasets },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: { font: { weight: 'bold', family: 'Helvetica' }, usePointStyle: true }
+        },
+        tooltip: {
+          backgroundColor: '#000',
+          titleFont: { weight: 'bold' },
+          callbacks: {
+            label: (ctx) => `${ctx.dataset.label}: ${formatMinutes(ctx.raw)}`
+          }
+        }
+      },
+      scales: {
+        x: { grid: { display: false }, ticks: { font: { weight: 'bold' } } },
+        y: { 
+          beginAtZero: true, 
+          grid: { color: '#eee' }, 
+          ticks: { 
+            font: { weight: 'bold' },
+            callback: (v) => formatMinutes(v)
+          } 
+        }
+      }
+    }
+  });
+}
+
+async function load() {
+  const params = new URLSearchParams({
+    period,
+    tz: $('tz').value,
+    dimension: $('dimension').value
+  });
+  if (period === 'custom') {
+    params.set('start', $('start').value);
+    params.set('end', $('end').value);
+  }
+
+  try {
+    const res = await fetch(API + '?' + params, {
+      headers: { 'x-dashboard-password': dashPass }
+    });
+
+    if (res.status === 401) {
+      $('login').classList.remove('hidden');
+      return;
+    }
+
+    const d = await res.json();
+    const s = d.summary;
+
+    $('login').classList.add('hidden');
+    $('hoursVal').textContent = nf.format(Math.round(s.total_minutes / 60));
+    $('plays').textContent = nf.format(s.total_plays);
+    $('tracks').textContent = nf.format(s.distinct_tracks);
+    $('last').textContent = s.last_listen ? new Date(s.last_listen).toLocaleDateString() : '—';
+    $('rangeLabel').textContent = (periods.find(x => x[0] === period)?.[1] || 'CUSTOM').toUpperCase();
+
+    renderCovers(d.topTracks);
+    renderList('artists', d.topArtists);
+    renderList('tracksList', d.topTracks);
+    renderList('albums', d.topAlbums);
+    renderList('subgenres', d.topSubgenres);
+    
+    $('genres').innerHTML = (d.topGenres || []).map(r => 
+      `<span class="pill">${esc(r.label)} ${formatMinutes(r.minutes)}</span>`
+    ).join('');
+
+    updateChart(d.graph.rows || []);
+
+    $('recent').innerHTML = (d.recent || []).map(r => `
+      <tr>
+        <td style="white-space: nowrap">${new Date(r.listened_at).toLocaleString()}</td>
+        <td><strong>${esc(r.track_name)}</strong></td>
+        <td>${esc(r.artist_name)}</td>
+        <td style="color: var(--muted)">${esc(r.album_name)}</td>
+      </tr>
+    `).join('');
+
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+$('loginForm').onsubmit = e => {
+  e.preventDefault();
+  dashPass = $('password').value;
+  localStorage.setItem('sonicPass', dashPass);
+  load();
+};
+
+$('dimension').onchange = load;
+$('tz').onchange = load;
+$('applyCustom').onclick = load;
+
+load();
+</script>
+</body>
+</html>
