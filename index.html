@@ -196,16 +196,22 @@
       overflow: hidden; 
       height: 400px;
       width: 100%;
+      align-content: flex-start;
     }
     .treemap-item { 
       position: relative; 
       cursor: pointer; 
       overflow: hidden; 
       border-radius: 4px;
-      transition: all 0.2s;
-      min-height: 80px;
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease;
+      min-height: 100px;
+      will-change: transform;
     }
-    .treemap-item:hover { z-index: 5; box-shadow: 0 0 20px rgba(0,0,0,0.2); transform: scale(0.99); }
+    .treemap-item:hover { 
+      z-index: 5; 
+      box-shadow: 0 8px 24px rgba(0,0,0,0.15); 
+      transform: scale(0.985); 
+    }
     .treemap-label { 
       position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; 
       padding: 12px; color: #fff; text-align: center; font-size: 13px; font-weight: 700;
@@ -475,14 +481,15 @@ async function renderSection(section, rows, key = 'minutes') {
     const treemap = document.createElement('div');
     treemap.className = 'treemap-container';
     
-    for (const r of rows.slice(0, 12)) {
+    for (const r of rows.slice(0, 15)) {
       const v = Number(r[key]) || 0;
       const weight = (v / total);
       const img = section === 'artists' ? findArtistImage(r.label) : r.image;
       const color = (section === 'genres' || section === 'subgenres') ? getHashColor(r.label) : await getDominantColor(img);
+      const basis = Math.max(weight * 100, 15); // Min 15% basis for visibility
       
       treemap.insertAdjacentHTML('beforeend', `
-        <div class="treemap-item" style="flex: ${weight} 0 auto; background: ${color}; width: ${weight * 100}%; min-width: 80px;">
+        <div class="treemap-item" style="flex: ${weight} 0 ${basis}%; background: ${color};">
           <div class="treemap-label">
             <strong>${esc(r.label)}</strong>
             <span>${key === 'minutes' ? formatMinutes(v) : nf.format(v)}</span>
