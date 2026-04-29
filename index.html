@@ -78,7 +78,6 @@
 
     main { padding: 0 80px 80px; }
     
-    /* Summary Bar */
     .summary-bar {
       display: grid;
       grid-template-columns: repeat(5, 1fr);
@@ -92,7 +91,6 @@
     .stat-label { font-size: 13px; font-weight: 700; text-transform: uppercase; color: var(--muted); letter-spacing: 0.02em; }
     .stat-value { font-size: 42px; font-weight: 700; letter-spacing: -0.02em; }
 
-    /* Hero Covers Grid (24 items) */
     .hero-grid { margin-bottom: 80px; }
     .covers-container {
       display: grid;
@@ -119,7 +117,7 @@
       backdrop-filter: blur(8px);
       color: #fff;
       padding: 12px;
-      font-size: 12px;
+      font-size: 11px;
       border-radius: 8px;
       pointer-events: none;
       opacity: 0;
@@ -127,11 +125,10 @@
       z-index: 100;
     }
     .cover-wrapper:hover .cover-tooltip { opacity: 1; }
-    .tooltip-album { font-weight: 700; display: block; color: var(--cta-blue); margin-bottom: 4px; }
+    .tooltip-album { font-weight: 700; display: block; color: var(--cta-blue); margin-bottom: 4px; font-size: 12px; }
     .tooltip-tracks { margin: 0; padding: 0; list-style: none; opacity: 0.9; }
-    .tooltip-tracks li { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .tooltip-tracks li { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 2px; }
 
-    /* Dashboard Sections */
     .section-header {
       display: flex;
       justify-content: space-between;
@@ -139,61 +136,74 @@
       margin-bottom: 32px;
       border-bottom: 1px solid var(--ink);
       padding-bottom: 12px;
+      flex-wrap: wrap;
+      gap: 16px;
     }
     h2 { font-size: 28px; font-weight: 700; margin: 0; text-transform: uppercase; letter-spacing: -0.02em; }
-    .view-toggles { display: flex; gap: 4px; }
-    .view-toggle { padding: 4px 12px; font-size: 11px; font-weight: 700; border-radius: 4px; }
+    .header-controls { display: flex; gap: 12px; align-items: center; }
+    .view-toggles { display: flex; gap: 4px; background: #f5f5f7; padding: 4px; border-radius: 8px; }
+    .view-toggle { padding: 4px 12px; font-size: 11px; font-weight: 700; border-radius: 4px; border: none; background: transparent; }
+    .view-toggle.active { background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
 
     .dashboard-grid {
       display: grid;
       grid-template-columns: repeat(12, 1fr);
-      gap: 60px;
+      gap: 80px;
     }
-    .panel { grid-column: span 12; margin-bottom: 40px; }
+    .panel { grid-column: span 12; margin-bottom: 60px; }
     .panel.half { grid-column: span 6; }
     
     .chart-container { height: 450px; position: relative; }
 
-    /* Display Modes */
-    .display-area { min-height: 200px; }
+    .display-area { min-height: 250px; }
     
-    /* Bar Mode */
     .data-list { display: flex; flex-direction: column; gap: 16px; }
     .data-row { display: grid; grid-template-columns: 1fr auto; align-items: flex-end; gap: 12px; }
     .data-label { font-weight: 500; font-size: 15px; }
     .data-bar-bg { height: 8px; background: #f5f5f7; border-radius: 4px; grid-column: 1 / -1; overflow: hidden; }
-    .data-bar-fill { height: 100%; background: var(--accent); border-radius: 4px; }
+    .data-bar-fill { height: 100%; border-radius: 4px; }
     .data-value { font-size: 13px; font-weight: 700; color: var(--muted); }
 
-    /* Aura Mode (Proportional Area) */
-    .aura-container { display: flex; flex-wrap: wrap; gap: 4px; border-radius: 12px; overflow: hidden; }
-    .aura-item { height: 120px; transition: flex 0.3s; position: relative; cursor: pointer; }
-    .aura-label { 
+    /* Treemap Mode */
+    .treemap-container { 
+      display: grid; 
+      grid-template-columns: repeat(12, 1fr); 
+      grid-auto-rows: minmax(100px, auto);
+      gap: 8px; 
+      border-radius: 12px; 
+      overflow: hidden; 
+      height: 400px;
+    }
+    .treemap-item { 
+      position: relative; 
+      cursor: pointer; 
+      overflow: hidden; 
+      border-radius: 8px;
+      transition: transform 0.2s;
+    }
+    .treemap-item:hover { transform: scale(0.98); }
+    .treemap-label { 
       position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; 
-      padding: 10px; color: #fff; text-align: center; font-size: 12px; font-weight: 700; opacity: 0; transition: opacity 0.2s;
-      background: rgba(0,0,0,0.4);
+      padding: 12px; color: #fff; text-align: center; font-size: 13px; font-weight: 700;
+      background: rgba(0,0,0,0.3); text-shadow: 0 2px 4px rgba(0,0,0,0.5);
     }
-    .aura-item:hover .aura-label { opacity: 1; }
+    .treemap-item:hover .treemap-label { background: rgba(0,0,0,0.1); }
 
-    /* Cover Mode */
-    .cover-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 16px; }
-    .cover-item { position: relative; aspect-ratio: 1; border-radius: 6px; overflow: hidden; }
+    .cover-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 20px; }
+    .cover-item { position: relative; aspect-ratio: 1; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.08); transition: transform 0.2s; }
+    .cover-item:hover { transform: translateY(-4px); }
     .cover-label-overlay { 
-      position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(transparent, rgba(0,0,0,0.8)); 
-      padding: 8px; color: #fff; font-size: 10px; font-weight: 700;
+      position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(transparent, rgba(0,0,0,0.9)); 
+      padding: 12px; color: #fff; font-size: 11px; font-weight: 700;
     }
 
-    table { width: 100%; border-collapse: collapse; font-size: 14px; }
-    th { text-align: left; text-transform: uppercase; font-weight: 700; color: var(--muted); padding: 12px 8px; border-bottom: 1px solid var(--border); }
-    td { padding: 16px 8px; border-bottom: 1px solid var(--border); }
-    tr:hover td { background: #f9f9fb; }
+    table { width: 100%; border-collapse: collapse; font-size: 15px; }
+    th { text-align: left; text-transform: uppercase; font-weight: 700; color: var(--muted); padding: 16px 8px; border-bottom: 1px solid var(--border); }
+    td { padding: 20px 8px; border-bottom: 1px solid var(--border); }
 
     #login { position: fixed; inset: 0; background: #fff; z-index: 1000; display: flex; justify-content: center; align-items: center; }
     #login.hidden { display: none; }
     .login-box { width: 440px; padding: 60px; text-align: center; }
-    .login-box h2 { border: none; font-size: 48px; margin-bottom: 40px; }
-    input[type="password"] { width: 100%; border: 1px solid var(--border); border-radius: 12px; padding: 16px; font-size: 18px; margin-bottom: 24px; text-align: center; }
-    .login-box button { width: 100%; border-radius: 12px; background: var(--ink); color: #fff; padding: 16px; font-size: 18px; font-weight: 700; }
 
     @media (max-width: 1200px) {
       header, main { padding: 40px; }
@@ -236,39 +246,17 @@
         <option value="America/Los_Angeles">PACIFIC TIME</option>
         <option value="UTC">UTC</option>
       </select>
-      <select id="dimension">
-        <option value="artist">BY ARTIST</option>
-        <option value="genre">BY GENRE</option>
-        <option value="subgenre">BY SUBGENRE</option>
-        <option value="track">BY TRACK</option>
-        <option value="album">BY ALBUM</option>
-      </select>
     </div>
   </div>
 </header>
 
 <main>
   <section class="summary-bar">
-    <article class="stat-item">
-      <span class="stat-label">Hours</span>
-      <strong class="stat-value" id="hoursVal">0</strong>
-    </article>
-    <article class="stat-item">
-      <span class="stat-label">Streams</span>
-      <strong class="stat-value" id="plays">0</strong>
-    </article>
-    <article class="stat-item">
-      <span class="stat-label">Tracks</span>
-      <strong class="stat-value" id="tracks">0</strong>
-    </article>
-    <article class="stat-item">
-      <span class="stat-label">Recent</span>
-      <strong class="stat-value" id="last">—</strong>
-    </article>
-    <article class="stat-item">
-      <span class="stat-label">Range</span>
-      <strong class="stat-value" id="rangeLabel">4 WEEKS</strong>
-    </article>
+    <article class="stat-item"><span class="stat-label">Hours</span><strong class="stat-value" id="hoursVal">0</strong></article>
+    <article class="stat-item"><span class="stat-label">Streams</span><strong class="stat-value" id="plays">0</strong></article>
+    <article class="stat-item"><span class="stat-label">Tracks</span><strong class="stat-value" id="tracks">0</strong></article>
+    <article class="stat-item"><span class="stat-label">Recent</span><strong class="stat-value" id="last">—</strong></article>
+    <article class="stat-item"><span class="stat-label">Range</span><strong class="stat-value" id="rangeLabel">4 WEEKS</strong></article>
   </section>
 
   <section class="hero-grid">
@@ -277,79 +265,92 @@
 
   <section class="dashboard-grid">
     <article class="panel">
-      <div class="section-header"><h2>Change Over Time</h2></div>
+      <div class="section-header">
+        <h2>Change Over Time</h2>
+        <div class="header-controls">
+          <select id="dimension">
+            <option value="artist">BY ARTIST</option>
+            <option value="genre">BY GENRE</option>
+            <option value="subgenre">BY SUBGENRE</option>
+            <option value="track">BY TRACK</option>
+            <option value="album">BY ALBUM</option>
+          </select>
+        </div>
+      </div>
       <div class="chart-container">
         <canvas id="timeChart"></canvas>
       </div>
     </article>
 
-    <!-- Artists Panel -->
     <article class="panel half">
       <div class="section-header">
         <h2>Top Artists</h2>
         <div class="view-toggles" data-section="artists">
           <button class="view-toggle active" data-mode="bar">BAR</button>
-          <button class="view-toggle" data-mode="aura">AURA</button>
+          <button class="view-toggle" data-mode="treemap">TREEMAP</button>
           <button class="view-toggle" data-mode="cover">COVER</button>
         </div>
       </div>
       <div id="artists-display" class="display-area"></div>
     </article>
 
-    <!-- Tracks Panel -->
     <article class="panel half">
       <div class="section-header">
         <h2>Top Tracks</h2>
         <div class="view-toggles" data-section="tracks">
           <button class="view-toggle active" data-mode="bar">BAR</button>
-          <button class="view-toggle" data-mode="aura">AURA</button>
+          <button class="view-toggle" data-mode="treemap">TREEMAP</button>
           <button class="view-toggle" data-mode="cover">COVER</button>
         </div>
       </div>
       <div id="tracks-display" class="display-area"></div>
     </article>
 
-    <!-- Albums Panel -->
     <article class="panel half">
       <div class="section-header">
         <h2>Top Albums</h2>
         <div class="view-toggles" data-section="albums">
           <button class="view-toggle active" data-mode="bar">BAR</button>
-          <button class="view-toggle" data-mode="aura">AURA</button>
+          <button class="view-toggle" data-mode="treemap">TREEMAP</button>
           <button class="view-toggle" data-mode="cover">COVER</button>
         </div>
       </div>
       <div id="albums-display" class="display-area"></div>
     </article>
 
-    <!-- Genres Panel -->
     <article class="panel half">
       <div class="section-header">
         <h2>Genres</h2>
         <div class="view-toggles" data-section="genres">
           <button class="view-toggle active" data-mode="bar">BAR</button>
-          <button class="view-toggle" data-mode="aura">AURA</button>
+          <button class="view-toggle" data-mode="treemap">TREEMAP</button>
         </div>
       </div>
       <div id="genres-display" class="display-area"></div>
     </article>
 
+    <article class="panel half">
+      <div class="section-header">
+        <h2>Sub-Genres</h2>
+        <div class="view-toggles" data-section="subgenres">
+          <button class="view-toggle active" data-mode="bar">BAR</button>
+          <button class="view-toggle" data-mode="treemap">TREEMAP</button>
+        </div>
+      </div>
+      <div id="subgenres-display" class="display-area"></div>
+    </article>
+
     <article class="panel">
       <div class="section-header"><h2>Recent Activity</h2></div>
       <table>
-        <thead>
-          <tr>
-            <th>Time</th>
-            <th>Track</th>
-            <th>Artist</th>
-            <th>Album</th>
-          </tr>
-        </thead>
+        <thead><tr><th>Time</th><th>Track</th><th>Artist</th><th>Album</th></tr></thead>
         <tbody id="recent"></tbody>
       </table>
     </article>
   </section>
 </main>
+
+<canvas id="colorCanvas" style="display:none"></canvas>
 
 <script>
 const API = 'https://qmfzabawnpmzzirrplom.supabase.co/functions/v1/sonic-dashboard/api';
@@ -361,14 +362,10 @@ let period = '4w';
 let dashPass = localStorage.getItem('sonicPass') || '';
 let chart = null;
 let currentData = null;
-let viewModes = { artists: 'bar', tracks: 'bar', albums: 'bar', genres: 'bar' };
+let viewModes = { artists: 'bar', tracks: 'bar', albums: 'bar', genres: 'bar', subgenres: 'bar' };
+let colorCache = new Map();
 
-const periods = [
-  ['4w', '4 WEEKS'], ['6m', '6 MONTHS'], ['1y', '1 YEAR'],
-  ['this_year', 'THIS YEAR'], ['last_year', 'LAST YEAR'],
-  ['all', 'ALL TIME'], ['custom', 'CUSTOM']
-];
-
+const periods = [['4w', '4 WEEKS'], ['6m', '6 MONTHS'], ['1y', '1 YEAR'], ['this_year', 'THIS YEAR'], ['last_year', 'LAST YEAR'], ['all', 'ALL TIME'], ['custom', 'CUSTOM']];
 periods.forEach(([v, l]) => {
   const b = document.createElement('button');
   b.textContent = l;
@@ -391,14 +388,41 @@ function esc(s) {
   return String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 }
 
-// Simple color hash for consistent colors when images aren't available
 function getHashColor(str) {
   let hash = 0;
   for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);
   return CTA_COLORS[Math.abs(hash) % CTA_COLORS.length];
 }
 
-function renderSection(section, rows, key = 'minutes') {
+async function getDominantColor(imgUrl) {
+  if (!imgUrl) return '#888';
+  if (colorCache.has(imgUrl)) return colorCache.get(imgUrl);
+
+  return new Promise(resolve => {
+    const img = new Image();
+    img.crossOrigin = "Anonymous";
+    img.onload = () => {
+      const canvas = $('colorCanvas');
+      const ctx = canvas.getContext('2d');
+      canvas.width = 1;
+      canvas.height = 1;
+      ctx.drawImage(img, 0, 0, 1, 1);
+      const [r, g, b] = ctx.getImageData(0, 0, 1, 1).data;
+      const hex = `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`;
+      colorCache.set(imgUrl, hex);
+      resolve(hex);
+    };
+    img.onerror = () => resolve('#888');
+    img.src = imgUrl;
+  });
+}
+
+function findArtistImage(artistName) {
+  const album = currentData.topAlbums.find(a => a.label.toLowerCase().endsWith(` - ${artistName.toLowerCase()}`));
+  return album ? album.image : null;
+}
+
+async function renderSection(section, rows, key = 'minutes') {
   const mode = viewModes[section];
   const container = $(`${section}-display`);
   container.innerHTML = '';
@@ -406,48 +430,54 @@ function renderSection(section, rows, key = 'minutes') {
 
   if (mode === 'bar') {
     const max = Math.max(...rows.map(r => Number(r[key]) || 0), 1);
-    rows.slice(0, 10).forEach(r => {
+    for (const r of rows.slice(0, 10)) {
       const v = Number(r[key]) || 0;
       const pct = (v / max) * 100;
+      const img = section === 'artists' ? findArtistImage(r.label) : r.image;
+      const color = section === 'genres' || section === 'subgenres' ? getHashColor(r.label) : await getDominantColor(img);
       container.insertAdjacentHTML('beforeend', `
         <div class="data-row">
           <div class="data-label">${esc(r.label)}</div>
           <div class="data-value">${key === 'minutes' ? formatMinutes(v) : nf.format(v)}</div>
-          <div class="data-bar-bg"><div class="data-bar-fill" style="width: ${pct}%; background: ${getHashColor(r.label)}"></div></div>
+          <div class="data-bar-bg"><div class="data-bar-fill" style="width: ${pct}%; background: ${color}"></div></div>
         </div>
       `);
-    });
-  } else if (mode === 'aura') {
+    }
+  } else if (mode === 'treemap') {
     const total = rows.reduce((sum, r) => sum + (Number(r[key]) || 0), 0);
-    const aura = document.createElement('div');
-    aura.className = 'aura-container';
-    rows.slice(0, 12).forEach(r => {
+    const treemap = document.createElement('div');
+    treemap.className = 'treemap-container';
+    
+    for (const [i, r] of rows.slice(0, 12).entries()) {
       const v = Number(r[key]) || 0;
       const weight = (v / total) * 100;
-      const color = r.image ? 'transparent' : getHashColor(r.label);
-      const style = r.image ? `background: url(${r.image}) center/cover;` : `background-color: ${color};`;
-      aura.insertAdjacentHTML('beforeend', `
-        <div class="aura-item" style="flex: ${weight}; ${style} min-width: ${Math.max(40, weight)}px">
-          <div class="aura-label">
+      const img = section === 'artists' ? findArtistImage(r.label) : r.image;
+      const color = section === 'genres' || section === 'subgenres' ? getHashColor(r.label) : await getDominantColor(img);
+      const span = weight > 15 ? 6 : weight > 8 ? 4 : weight > 4 ? 3 : 2;
+      
+      treemap.insertAdjacentHTML('beforeend', `
+        <div class="treemap-item" style="grid-column: span ${span}; background: ${color} url(${img || ''}) center/cover; background-blend-mode: overlay;">
+          <div class="treemap-label">
             <strong>${esc(r.label)}</strong>
             <span>${key === 'minutes' ? formatMinutes(v) : nf.format(v)}</span>
           </div>
         </div>
       `);
-    });
-    container.appendChild(aura);
+    }
+    container.appendChild(treemap);
   } else if (mode === 'cover') {
     const grid = document.createElement('div');
     grid.className = 'cover-list';
-    rows.slice(0, 18).forEach(r => {
-      if (!r.image) return;
+    for (const r of rows.slice(0, 12)) {
+      const img = section === 'artists' ? findArtistImage(r.label) : r.image;
+      if (!img) continue;
       grid.insertAdjacentHTML('beforeend', `
         <div class="cover-item">
-          <img src="${r.image}" class="cover-img" alt="${esc(r.label)}">
+          <img src="${img}" class="cover-img">
           <div class="cover-label-overlay">${esc(r.label)}</div>
         </div>
       `);
-    });
+    }
     container.appendChild(grid);
   }
 }
@@ -455,23 +485,27 @@ function renderSection(section, rows, key = 'minutes') {
 function renderHero(topTracks) {
   const container = $('covers');
   container.innerHTML = '';
-  
-  const albums = [];
   const seen = new Set();
+  const albums = [];
   
-  (topTracks || []).forEach(t => {
-    if (t.image && !seen.has(t.image)) {
-      seen.add(t.image);
+  // Use topAlbums for better metadata
+  (currentData.topAlbums || []).forEach(a => {
+    if (a.image && !seen.has(a.image)) {
+      seen.add(a.image);
+      const [albumName] = a.label.split(' - ');
       albums.push({
-        image: t.image,
-        album: t.album_name || 'Unknown Album',
-        tracks: (topTracks || []).filter(x => x.image === t.image).slice(0, 5).map(x => x.label)
+        image: a.image,
+        album: albumName,
+        tracks: (topTracks || []).filter(x => x.image === a.image).slice(0, 5).map(x => x.label.split(' - ')[0])
       });
     }
   });
 
-  // Ensure 24 covers (3 rows of 8)
-  albums.slice(0, 24).forEach(a => {
+  // Fill 24 covers (3 rows of 8)
+  const display = albums.slice(0, 24);
+  while (display.length < 24 && display.length > 0) display.push(display[display.length % display.length]);
+
+  display.forEach(a => {
     const tracksHtml = a.tracks.map(t => `<li>${esc(t)}</li>`).join('');
     container.insertAdjacentHTML('beforeend', `
       <div class="cover-wrapper">
@@ -497,8 +531,8 @@ function updateChart(rows) {
       return row ? row.minutes : 0;
     }),
     borderColor: CTA_COLORS[i % CTA_COLORS.length],
-    backgroundColor: CTA_COLORS[i % CTA_COLORS.length] + '22',
-    fill: true,
+    backgroundColor: 'transparent',
+    fill: false,
     tension: 0.3,
     pointRadius: 4,
     pointHoverRadius: 8
@@ -515,20 +549,17 @@ function updateChart(rows) {
       plugins: {
         legend: { position: 'bottom', labels: { font: { family: 'Google Sans', weight: 'bold' } } },
         tooltip: {
-          backgroundColor: 'rgba(0,0,0,0.8)',
-          titleFont: { family: 'Google Sans', size: 14 },
+          backgroundColor: 'rgba(0,0,0,0.85)',
+          titleFont: { family: 'Google Sans', size: 14, weight: 'bold' },
           bodyFont: { family: 'Google Sans' },
-          padding: 12,
+          padding: 16,
+          cornerRadius: 12,
           callbacks: { label: (c) => `${c.dataset.label}: ${formatMinutes(c.raw)}` }
         }
       },
       scales: {
         x: { grid: { display: false }, ticks: { font: { family: 'Google Sans', weight: 'bold' } } },
-        y: { 
-          beginAtZero: true, 
-          grid: { color: '#f0f0f2' },
-          ticks: { font: { family: 'Google Sans' }, callback: (v) => formatMinutes(v) }
-        }
+        y: { beginAtZero: true, grid: { color: '#f0f0f2' }, ticks: { font: { family: 'Google Sans' }, callback: (v) => formatMinutes(v) } }
       }
     }
   });
@@ -536,10 +567,7 @@ function updateChart(rows) {
 
 async function load() {
   const params = new URLSearchParams({ period, tz: $('tz').value, dimension: $('dimension').value });
-  if (period === 'custom') {
-    params.set('start', $('start').value);
-    params.set('end', $('end').value);
-  }
+  if (period === 'custom') { params.set('start', $('start').value); params.set('end', $('end').value); }
 
   try {
     const res = await fetch(API + '?' + params, { headers: { 'x-dashboard-password': dashPass } });
@@ -547,7 +575,6 @@ async function load() {
     
     currentData = await res.json();
     const s = currentData.summary;
-
     $('login').classList.add('hidden');
     $('hoursVal').textContent = nf.format(Math.round(s.total_minutes / 60));
     $('plays').textContent = nf.format(s.total_plays);
@@ -557,18 +584,16 @@ async function load() {
 
     renderHero(currentData.topTracks);
     updateChart(currentData.graph.rows || []);
-    
     refreshDisplays();
 
     $('recent').innerHTML = (currentData.recent || []).map(r => `
       <tr>
-        <td style="color: var(--muted); font-size: 12px;">${new Date(r.listened_at).toLocaleString()}</td>
+        <td style="color: var(--muted); font-size: 13px;">${new Date(r.listened_at).toLocaleString()}</td>
         <td><strong>${esc(r.track_name)}</strong></td>
         <td>${esc(r.artist_name)}</td>
         <td style="color: var(--muted)">${esc(r.album_name)}</td>
       </tr>
     `).join('');
-
   } catch (err) { console.error(err); }
 }
 
@@ -578,29 +603,22 @@ function refreshDisplays() {
   renderSection('tracks', currentData.topTracks);
   renderSection('albums', currentData.topAlbums);
   renderSection('genres', currentData.topGenres);
+  renderSection('subgenres', currentData.topSubgenres);
 }
 
 document.querySelectorAll('.view-toggle').forEach(btn => {
   btn.onclick = () => {
     const section = btn.parentElement.dataset.section;
-    const mode = btn.dataset.mode;
-    viewModes[section] = mode;
+    viewModes[section] = btn.dataset.mode;
     btn.parentElement.querySelectorAll('.view-toggle').forEach(b => b.classList.toggle('active', b === btn));
     refreshDisplays();
   };
 });
 
-$('loginForm').onsubmit = e => {
-  e.preventDefault();
-  dashPass = $('password').value;
-  localStorage.setItem('sonicPass', dashPass);
-  load();
-};
-
+$('loginForm').onsubmit = e => { e.preventDefault(); dashPass = $('password').value; localStorage.setItem('sonicPass', dashPass); load(); };
 $('dimension').onchange = load;
 $('tz').onchange = load;
 $('applyCustom').onclick = load;
-
 load();
 </script>
 </body>
