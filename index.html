@@ -4,203 +4,202 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>SonicStatistics</title>
+  <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700;900&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     :root {
       --paper: #ffffff;
-      --ink: #000000;
-      --accent: #F04E37;
-      --muted: #666666;
-      --grid: #000000;
+      --ink: #1d1d1f;
+      --accent: #C60C30; /* CTA Red */
+      --muted: #86868b;
+      --cta-red: #C60C30;
+      --cta-blue: #00A1DE;
+      --cta-brown: #62361B;
+      --cta-green: #009B3A;
+      --cta-orange: #F9461C;
+      --cta-pink: #E27EA6;
+      --cta-purple: #522398;
+      --cta-yellow: #F9E300;
+      --border: #e5e5e7;
     }
     * { box-sizing: border-box; }
     body {
       margin: 0;
       background: var(--paper);
       color: var(--ink);
-      font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-      line-height: 1.2;
+      font-family: "Google Sans", sans-serif;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
     }
     header {
-      padding: 40px 40px 20px;
-      border-bottom: 4px solid var(--ink);
+      padding: 60px 80px 40px;
       display: flex;
       justify-content: space-between;
-      align-items: flex-end;
+      align-items: flex-start;
     }
     h1 {
       margin: 0;
-      font-size: 80px;
+      font-size: 64px;
       font-weight: 900;
       letter-spacing: -0.04em;
-      line-height: 0.8;
+      line-height: 0.9;
       text-transform: uppercase;
     }
     .deck {
       color: var(--accent);
-      font-size: 14px;
-      font-weight: 900;
+      font-size: 16px;
+      font-weight: 700;
       text-transform: uppercase;
-      margin-bottom: 10px;
+      margin-bottom: 12px;
+      letter-spacing: 0.05em;
     }
     .controls {
       display: flex;
       flex-direction: column;
       align-items: flex-end;
-      gap: 12px;
+      gap: 20px;
     }
-    .row { display: flex; gap: 8px; }
+    .row { display: flex; gap: 12px; }
     button, select, input {
-      border: 2px solid var(--ink);
-      background: #fff;
+      border: 1px solid var(--border);
+      background: #f5f5f7;
       font: inherit;
-      font-weight: 700;
-      padding: 6px 12px;
-      text-transform: uppercase;
-      font-size: 12px;
+      font-weight: 500;
+      padding: 10px 18px;
+      border-radius: 99px;
+      font-size: 13px;
       cursor: pointer;
+      transition: all 0.2s;
     }
-    button.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+    button:hover { background: #e8e8ed; }
+    button.active { background: var(--ink); color: #fff; border-color: var(--ink); }
     .datebox { display: none; }
     .datebox.active { display: flex; }
 
-    main { padding: 0 40px 40px; }
+    main { padding: 0 80px 80px; }
     
-    /* Stats Row */
+    /* Summary Bar */
     .summary-bar {
       display: grid;
       grid-template-columns: repeat(5, 1fr);
-      border-bottom: 2px solid var(--ink);
-      padding: 20px 0;
-      margin-bottom: 40px;
-    }
-    .stat-item { border-left: 1px solid var(--ink); padding-left: 20px; }
-    .stat-item:first-child { border-left: none; padding-left: 0; }
-    .stat-label { font-size: 12px; font-weight: 900; text-transform: uppercase; color: var(--muted); display: block; }
-    .stat-value { font-size: 32px; font-weight: 900; letter-spacing: -0.02em; }
-
-    /* Hero Covers */
-    .hero-grid {
-      display: grid;
-      grid-template-columns: 1fr;
       gap: 40px;
-      margin-bottom: 40px;
+      margin-bottom: 80px;
+      padding: 40px 0;
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
     }
+    .stat-item { display: flex; flex-direction: column; gap: 8px; }
+    .stat-label { font-size: 13px; font-weight: 700; text-transform: uppercase; color: var(--muted); letter-spacing: 0.02em; }
+    .stat-value { font-size: 42px; font-weight: 700; letter-spacing: -0.02em; }
+
+    /* Hero Covers Grid (24 items) */
+    .hero-grid { margin-bottom: 80px; }
     .covers-container {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-      gap: 10px;
+      grid-template-columns: repeat(8, 1fr);
+      gap: 12px;
     }
     .cover-wrapper {
       position: relative;
       aspect-ratio: 1;
-      border: 1px solid var(--ink);
-      background: #eee;
+      border-radius: 8px;
+      overflow: hidden;
+      background: #f5f5f7;
       cursor: crosshair;
+      transition: transform 0.2s;
     }
+    .cover-wrapper:hover { transform: scale(1.05); z-index: 10; }
     .cover-img { width: 100%; height: 100%; object-fit: cover; display: block; }
     .cover-tooltip {
       position: absolute;
-      bottom: 100%;
-      left: 50%;
-      transform: translateX(-50%);
-      background: var(--ink);
+      bottom: 10px;
+      left: 10px;
+      right: 10px;
+      background: rgba(0,0,0,0.85);
+      backdrop-filter: blur(8px);
       color: #fff;
-      padding: 10px;
-      font-size: 11px;
-      width: 200px;
+      padding: 12px;
+      font-size: 12px;
+      border-radius: 8px;
       pointer-events: none;
       opacity: 0;
       transition: opacity 0.2s;
       z-index: 100;
-      margin-bottom: 10px;
-    }
-    .cover-tooltip::after {
-      content: '';
-      position: absolute;
-      top: 100%;
-      left: 50%;
-      margin-left: -5px;
-      border-width: 5px;
-      border-style: solid;
-      border-color: var(--ink) transparent transparent transparent;
     }
     .cover-wrapper:hover .cover-tooltip { opacity: 1; }
-    .tooltip-title { font-weight: 900; margin-bottom: 5px; display: block; border-bottom: 1px solid #444; padding-bottom: 3px; }
-    .tooltip-tracks { margin: 0; padding: 0; list-style: none; }
-    .tooltip-tracks li { margin-bottom: 2px; }
+    .tooltip-album { font-weight: 700; display: block; color: var(--cta-blue); margin-bottom: 4px; }
+    .tooltip-tracks { margin: 0; padding: 0; list-style: none; opacity: 0.9; }
+    .tooltip-tracks li { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-    /* Grid Layout */
-    .dashboard-grid {
-      display: grid;
-      grid-template-columns: repeat(12, 1fr);
-      gap: 40px;
-    }
-    .panel { grid-column: span 6; }
-    .panel.full { grid-column: span 12; }
-    h2 {
-      font-size: 24px;
-      font-weight: 900;
-      text-transform: uppercase;
-      margin: 0 0 20px;
-      border-top: 4px solid var(--ink);
-      padding-top: 10px;
+    /* Dashboard Sections */
+    .section-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
+      margin-bottom: 32px;
+      border-bottom: 1px solid var(--ink);
+      padding-bottom: 12px;
     }
-    .chart-container { height: 400px; position: relative; }
+    h2 { font-size: 28px; font-weight: 700; margin: 0; text-transform: uppercase; letter-spacing: -0.02em; }
+    .view-toggles { display: flex; gap: 4px; }
+    .view-toggle { padding: 4px 12px; font-size: 11px; font-weight: 700; border-radius: 4px; }
 
-    /* Lists */
-    .data-list { display: flex; flex-direction: column; gap: 8px; }
-    .data-row {
+    .dashboard-grid {
       display: grid;
-      grid-template-columns: 1fr auto;
-      align-items: flex-end;
-      gap: 10px;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 60px;
     }
-    .data-label {
-      font-weight: 700;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .data-bar-bg { height: 12px; background: #eee; grid-column: 1 / -1; margin-top: 2px; }
-    .data-bar-fill { height: 100%; background: var(--accent); }
-    .data-value { font-size: 12px; font-weight: 900; }
+    .panel { grid-column: span 12; margin-bottom: 40px; }
+    .panel.half { grid-column: span 6; }
+    
+    .chart-container { height: 450px; position: relative; }
 
-    .pills { display: flex; flex-wrap: wrap; gap: 8px; }
-    .pill {
-      border: 2px solid var(--ink);
-      padding: 4px 10px;
-      font-weight: 900;
-      font-size: 13px;
-      background: #fff;
+    /* Display Modes */
+    .display-area { min-height: 200px; }
+    
+    /* Bar Mode */
+    .data-list { display: flex; flex-direction: column; gap: 16px; }
+    .data-row { display: grid; grid-template-columns: 1fr auto; align-items: flex-end; gap: 12px; }
+    .data-label { font-weight: 500; font-size: 15px; }
+    .data-bar-bg { height: 8px; background: #f5f5f7; border-radius: 4px; grid-column: 1 / -1; overflow: hidden; }
+    .data-bar-fill { height: 100%; background: var(--accent); border-radius: 4px; }
+    .data-value { font-size: 13px; font-weight: 700; color: var(--muted); }
+
+    /* Aura Mode (Proportional Area) */
+    .aura-container { display: flex; flex-wrap: wrap; gap: 4px; border-radius: 12px; overflow: hidden; }
+    .aura-item { height: 120px; transition: flex 0.3s; position: relative; cursor: pointer; }
+    .aura-label { 
+      position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; 
+      padding: 10px; color: #fff; text-align: center; font-size: 12px; font-weight: 700; opacity: 0; transition: opacity 0.2s;
+      background: rgba(0,0,0,0.4);
+    }
+    .aura-item:hover .aura-label { opacity: 1; }
+
+    /* Cover Mode */
+    .cover-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 16px; }
+    .cover-item { position: relative; aspect-ratio: 1; border-radius: 6px; overflow: hidden; }
+    .cover-label-overlay { 
+      position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(transparent, rgba(0,0,0,0.8)); 
+      padding: 8px; color: #fff; font-size: 10px; font-weight: 700;
     }
 
-    table { width: 100%; border-collapse: collapse; font-size: 12px; }
-    th { text-align: left; text-transform: uppercase; font-weight: 900; padding: 8px 4px; border-bottom: 2px solid var(--ink); }
-    td { padding: 8px 4px; border-bottom: 1px solid #ddd; }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    th { text-align: left; text-transform: uppercase; font-weight: 700; color: var(--muted); padding: 12px 8px; border-bottom: 1px solid var(--border); }
+    td { padding: 16px 8px; border-bottom: 1px solid var(--border); }
+    tr:hover td { background: #f9f9fb; }
 
-    #login {
-      position: fixed;
-      inset: 0;
-      background: var(--paper);
-      z-index: 1000;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
+    #login { position: fixed; inset: 0; background: #fff; z-index: 1000; display: flex; justify-content: center; align-items: center; }
     #login.hidden { display: none; }
-    .login-box { width: 400px; border-top: 12px solid var(--accent); padding: 40px; border-bottom: 4px solid var(--ink); }
-    .login-box h2 { border: none; padding: 0; font-size: 48px; margin-bottom: 20px; }
-    input[type="password"] { width: 100%; margin-bottom: 20px; padding: 12px; font-size: 18px; }
-    .login-box button { width: 100%; padding: 12px; font-size: 18px; background: var(--ink); color: #fff; }
+    .login-box { width: 440px; padding: 60px; text-align: center; }
+    .login-box h2 { border: none; font-size: 48px; margin-bottom: 40px; }
+    input[type="password"] { width: 100%; border: 1px solid var(--border); border-radius: 12px; padding: 16px; font-size: 18px; margin-bottom: 24px; text-align: center; }
+    .login-box button { width: 100%; border-radius: 12px; background: var(--ink); color: #fff; padding: 16px; font-size: 18px; font-weight: 700; }
 
-    @media (max-width: 1024px) {
-      header { flex-direction: column; align-items: flex-start; gap: 20px; }
-      .summary-bar { grid-template-columns: repeat(2, 1fr); gap: 20px; }
-      .panel { grid-column: span 12; }
+    @media (max-width: 1200px) {
+      header, main { padding: 40px; }
+      .covers-container { grid-template-columns: repeat(4, 1fr); }
+      .summary-bar { grid-template-columns: repeat(2, 1fr); }
+      .panel.half { grid-column: span 12; }
     }
   </style>
 </head>
@@ -208,19 +207,19 @@
 
 <div id="login">
   <div class="login-box">
-    <p class="deck">Access Restricted</p>
-    <h2>Sonic<br>Statistics</h2>
-    <form id="loginForm">
+    <p class="deck">Private Listening Statistics</p>
+    <h1>Sonic<br>Statistics</h1>
+    <form id="loginForm" style="margin-top: 40px;">
       <input id="password" type="password" placeholder="PASSWORD" autofocus>
       <button>ENTER</button>
-      <p id="loginError" style="color: var(--accent); font-weight: 900; margin-top: 10px;"></p>
+      <p id="loginError" style="color: var(--cta-red); font-weight: 700; margin-top: 16px;"></p>
     </form>
   </div>
 </div>
 
 <header>
   <div>
-    <p class="deck">Private Listening Archive / v2.0</p>
+    <p class="deck">CHICAGO TRANSIT AUTHORITY / AUDIO ARCHIVE</p>
     <h1>SonicStatistics</h1>
   </div>
   <div class="controls">
@@ -232,18 +231,17 @@
     </div>
     <div class="row">
       <select id="tz">
-        <option value="America/Chicago">CENTRAL</option>
-        <option value="America/New_York">EASTERN</option>
-        <option value="America/Los_Angeles">PACIFIC</option>
+        <option value="America/Chicago">CENTRAL TIME</option>
+        <option value="America/New_York">EASTERN TIME</option>
+        <option value="America/Los_Angeles">PACIFIC TIME</option>
         <option value="UTC">UTC</option>
       </select>
       <select id="dimension">
-        <option value="artist">ARTIST OVER TIME</option>
-        <option value="genre">GENRE OVER TIME</option>
-        <option value="subgenre">SUBGENRE OVER TIME</option>
-        <option value="track">TRACK OVER TIME</option>
-        <option value="album">ALBUM OVER TIME</option>
-        <option value="source">SOURCE OVER TIME</option>
+        <option value="artist">BY ARTIST</option>
+        <option value="genre">BY GENRE</option>
+        <option value="subgenre">BY SUBGENRE</option>
+        <option value="track">BY TRACK</option>
+        <option value="album">BY ALBUM</option>
       </select>
     </div>
   </div>
@@ -252,7 +250,7 @@
 <main>
   <section class="summary-bar">
     <article class="stat-item">
-      <span class="stat-label">Hours Listened</span>
+      <span class="stat-label">Hours</span>
       <strong class="stat-value" id="hoursVal">0</strong>
     </article>
     <article class="stat-item">
@@ -260,15 +258,15 @@
       <strong class="stat-value" id="plays">0</strong>
     </article>
     <article class="stat-item">
-      <span class="stat-label">Distinct Tracks</span>
+      <span class="stat-label">Tracks</span>
       <strong class="stat-value" id="tracks">0</strong>
     </article>
     <article class="stat-item">
-      <span class="stat-label">Last Listen</span>
+      <span class="stat-label">Recent</span>
       <strong class="stat-value" id="last">—</strong>
     </article>
     <article class="stat-item">
-      <span class="stat-label">Period</span>
+      <span class="stat-label">Range</span>
       <strong class="stat-value" id="rangeLabel">4 WEEKS</strong>
     </article>
   </section>
@@ -278,53 +276,77 @@
   </section>
 
   <section class="dashboard-grid">
-    <article class="panel full">
-      <h2>Change Over Time</h2>
+    <article class="panel">
+      <div class="section-header"><h2>Change Over Time</h2></div>
       <div class="chart-container">
         <canvas id="timeChart"></canvas>
       </div>
     </article>
 
-    <article class="panel">
-      <h2>Top Artists</h2>
-      <div id="artists" class="data-list"></div>
-    </article>
-
-    <article class="panel">
-      <h2>Top Tracks</h2>
-      <div id="tracksList" class="data-list"></div>
-    </article>
-
-    <article class="panel">
-      <h2>Top Albums</h2>
-      <div id="albums" class="data-list"></div>
-    </article>
-
-    <article class="panel">
-      <h2>Genre Families</h2>
-      <div id="genres" class="pills"></div>
-    </article>
-
-    <article class="panel">
-      <h2>Subgenres</h2>
-      <div id="subgenres" class="data-list"></div>
-    </article>
-
-    <article class="panel full">
-      <h2>Recent Activity</h2>
-      <div style="max-height: 500px; overflow: auto;">
-        <table>
-          <thead>
-            <tr>
-              <th>Timestamp</th>
-              <th>Track</th>
-              <th>Artist</th>
-              <th>Album</th>
-            </tr>
-          </thead>
-          <tbody id="recent"></tbody>
-        </table>
+    <!-- Artists Panel -->
+    <article class="panel half">
+      <div class="section-header">
+        <h2>Top Artists</h2>
+        <div class="view-toggles" data-section="artists">
+          <button class="view-toggle active" data-mode="bar">BAR</button>
+          <button class="view-toggle" data-mode="aura">AURA</button>
+          <button class="view-toggle" data-mode="cover">COVER</button>
+        </div>
       </div>
+      <div id="artists-display" class="display-area"></div>
+    </article>
+
+    <!-- Tracks Panel -->
+    <article class="panel half">
+      <div class="section-header">
+        <h2>Top Tracks</h2>
+        <div class="view-toggles" data-section="tracks">
+          <button class="view-toggle active" data-mode="bar">BAR</button>
+          <button class="view-toggle" data-mode="aura">AURA</button>
+          <button class="view-toggle" data-mode="cover">COVER</button>
+        </div>
+      </div>
+      <div id="tracks-display" class="display-area"></div>
+    </article>
+
+    <!-- Albums Panel -->
+    <article class="panel half">
+      <div class="section-header">
+        <h2>Top Albums</h2>
+        <div class="view-toggles" data-section="albums">
+          <button class="view-toggle active" data-mode="bar">BAR</button>
+          <button class="view-toggle" data-mode="aura">AURA</button>
+          <button class="view-toggle" data-mode="cover">COVER</button>
+        </div>
+      </div>
+      <div id="albums-display" class="display-area"></div>
+    </article>
+
+    <!-- Genres Panel -->
+    <article class="panel half">
+      <div class="section-header">
+        <h2>Genres</h2>
+        <div class="view-toggles" data-section="genres">
+          <button class="view-toggle active" data-mode="bar">BAR</button>
+          <button class="view-toggle" data-mode="aura">AURA</button>
+        </div>
+      </div>
+      <div id="genres-display" class="display-area"></div>
+    </article>
+
+    <article class="panel">
+      <div class="section-header"><h2>Recent Activity</h2></div>
+      <table>
+        <thead>
+          <tr>
+            <th>Time</th>
+            <th>Track</th>
+            <th>Artist</th>
+            <th>Album</th>
+          </tr>
+        </thead>
+        <tbody id="recent"></tbody>
+      </table>
     </article>
   </section>
 </main>
@@ -333,14 +355,18 @@
 const API = 'https://qmfzabawnpmzzirrplom.supabase.co/functions/v1/sonic-dashboard/api';
 const $ = id => document.getElementById(id);
 const nf = new Intl.NumberFormat();
+const CTA_COLORS = ['#C60C30', '#00A1DE', '#62361B', '#009B3A', '#F9461C', '#E27EA6', '#522398', '#F9E300'];
+
 let period = '4w';
 let dashPass = localStorage.getItem('sonicPass') || '';
 let chart = null;
+let currentData = null;
+let viewModes = { artists: 'bar', tracks: 'bar', albums: 'bar', genres: 'bar' };
 
 const periods = [
-  ['4w', '4 Weeks'], ['6m', '6 Months'], ['1y', '1 Year'],
-  ['this_year', 'This Year'], ['last_year', 'Last Year'],
-  ['last_two_years', 'Last 2 Years'], ['all', 'All Time'], ['custom', 'Custom']
+  ['4w', '4 WEEKS'], ['6m', '6 MONTHS'], ['1y', '1 YEAR'],
+  ['this_year', 'THIS YEAR'], ['last_year', 'LAST YEAR'],
+  ['all', 'ALL TIME'], ['custom', 'CUSTOM']
 ];
 
 periods.forEach(([v, l]) => {
@@ -365,50 +391,94 @@ function esc(s) {
   return String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 }
 
-function renderList(id, rows, key = 'minutes') {
-  const e = $(id);
-  e.innerHTML = '';
-  const max = Math.max(...(rows || []).map(r => Number(r[key]) || 0), 1);
-  (rows || []).slice(0, 10).forEach(r => {
-    const v = Number(r[key]) || 0;
-    const pct = Math.max(1, (v / max) * 100);
-    e.insertAdjacentHTML('beforeend', `
-      <div class="data-row">
-        <div class="data-label" title="${esc(r.label)}">${esc(r.label)}</div>
-        <div class="data-value">${key === 'minutes' ? formatMinutes(v) : nf.format(v)}</div>
-        <div class="data-bar-bg"><div class="data-bar-fill" style="width: ${pct}%"></div></div>
-      </div>
-    `);
-  });
+// Simple color hash for consistent colors when images aren't available
+function getHashColor(str) {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);
+  return CTA_COLORS[Math.abs(hash) % CTA_COLORS.length];
 }
 
-function renderCovers(topTracks) {
+function renderSection(section, rows, key = 'minutes') {
+  const mode = viewModes[section];
+  const container = $(`${section}-display`);
+  container.innerHTML = '';
+  if (!rows || rows.length === 0) return;
+
+  if (mode === 'bar') {
+    const max = Math.max(...rows.map(r => Number(r[key]) || 0), 1);
+    rows.slice(0, 10).forEach(r => {
+      const v = Number(r[key]) || 0;
+      const pct = (v / max) * 100;
+      container.insertAdjacentHTML('beforeend', `
+        <div class="data-row">
+          <div class="data-label">${esc(r.label)}</div>
+          <div class="data-value">${key === 'minutes' ? formatMinutes(v) : nf.format(v)}</div>
+          <div class="data-bar-bg"><div class="data-bar-fill" style="width: ${pct}%; background: ${getHashColor(r.label)}"></div></div>
+        </div>
+      `);
+    });
+  } else if (mode === 'aura') {
+    const total = rows.reduce((sum, r) => sum + (Number(r[key]) || 0), 0);
+    const aura = document.createElement('div');
+    aura.className = 'aura-container';
+    rows.slice(0, 12).forEach(r => {
+      const v = Number(r[key]) || 0;
+      const weight = (v / total) * 100;
+      const color = r.image ? 'transparent' : getHashColor(r.label);
+      const style = r.image ? `background: url(${r.image}) center/cover;` : `background-color: ${color};`;
+      aura.insertAdjacentHTML('beforeend', `
+        <div class="aura-item" style="flex: ${weight}; ${style} min-width: ${Math.max(40, weight)}px">
+          <div class="aura-label">
+            <strong>${esc(r.label)}</strong>
+            <span>${key === 'minutes' ? formatMinutes(v) : nf.format(v)}</span>
+          </div>
+        </div>
+      `);
+    });
+    container.appendChild(aura);
+  } else if (mode === 'cover') {
+    const grid = document.createElement('div');
+    grid.className = 'cover-list';
+    rows.slice(0, 18).forEach(r => {
+      if (!r.image) return;
+      grid.insertAdjacentHTML('beforeend', `
+        <div class="cover-item">
+          <img src="${r.image}" class="cover-img" alt="${esc(r.label)}">
+          <div class="cover-label-overlay">${esc(r.label)}</div>
+        </div>
+      `);
+    });
+    container.appendChild(grid);
+  }
+}
+
+function renderHero(topTracks) {
   const container = $('covers');
   container.innerHTML = '';
   
-  // Deduplicate by album image
-  const seen = new Set();
   const albums = [];
+  const seen = new Set();
   
   (topTracks || []).forEach(t => {
     if (t.image && !seen.has(t.image)) {
       seen.add(t.image);
       albums.push({
         image: t.image,
-        album: t.album_name || t.label,
-        tracks: (topTracks || []).filter(x => x.image === t.image).slice(0, 5)
+        album: t.album_name || 'Unknown Album',
+        tracks: (topTracks || []).filter(x => x.image === t.image).slice(0, 5).map(x => x.label)
       });
     }
   });
 
-  albums.slice(0, 15).forEach(a => {
-    const trackList = a.tracks.map(t => `<li>${esc(t.label)}</li>`).join('');
+  // Ensure 24 covers (3 rows of 8)
+  albums.slice(0, 24).forEach(a => {
+    const tracksHtml = a.tracks.map(t => `<li>${esc(t)}</li>`).join('');
     container.insertAdjacentHTML('beforeend', `
       <div class="cover-wrapper">
-        <img src="${a.image}" class="cover-img" alt="${esc(a.album)}">
+        <img src="${a.image}" class="cover-img">
         <div class="cover-tooltip">
-          <span class="tooltip-title">${esc(a.album)}</span>
-          <ul class="tooltip-tracks">${trackList}</ul>
+          <span class="tooltip-album">${esc(a.album)}</span>
+          <ul class="tooltip-tracks">${tracksHtml}</ul>
         </div>
       </div>
     `);
@@ -417,55 +487,47 @@ function renderCovers(topTracks) {
 
 function updateChart(rows) {
   const ctx = $('timeChart').getContext('2d');
-  const labels = [...new Set(rows.map(r => r.bucket))].sort();
+  const buckets = [...new Set(rows.map(r => r.bucket))].sort();
   const seriesNames = [...new Set(rows.map(r => r.label))];
   
-  const datasets = seriesNames.map((name, i) => {
-    const colors = ['#F04E37', '#000000', '#666666', '#999999', '#CCCCCC'];
-    return {
-      label: name,
-      data: labels.map(l => {
-        const row = rows.find(r => r.bucket === l && r.label === name);
-        return row ? row.minutes : 0;
-      }),
-      borderColor: colors[i % colors.length],
-      backgroundColor: colors[i % colors.length],
-      borderWidth: 3,
-      pointRadius: 0,
-      tension: 0.1
-    };
-  });
+  const datasets = seriesNames.map((name, i) => ({
+    label: name,
+    data: buckets.map(b => {
+      const row = rows.find(r => r.bucket === b && r.label === name);
+      return row ? row.minutes : 0;
+    }),
+    borderColor: CTA_COLORS[i % CTA_COLORS.length],
+    backgroundColor: CTA_COLORS[i % CTA_COLORS.length] + '22',
+    fill: true,
+    tension: 0.3,
+    pointRadius: 4,
+    pointHoverRadius: 8
+  }));
 
   if (chart) chart.destroy();
-  
   chart = new Chart(ctx, {
     type: 'line',
-    data: { labels, datasets },
+    data: { labels: buckets, datasets },
     options: {
       responsive: true,
       maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
       plugins: {
-        legend: {
-          position: 'bottom',
-          labels: { font: { weight: 'bold', family: 'Helvetica' }, usePointStyle: true }
-        },
+        legend: { position: 'bottom', labels: { font: { family: 'Google Sans', weight: 'bold' } } },
         tooltip: {
-          backgroundColor: '#000',
-          titleFont: { weight: 'bold' },
-          callbacks: {
-            label: (ctx) => `${ctx.dataset.label}: ${formatMinutes(ctx.raw)}`
-          }
+          backgroundColor: 'rgba(0,0,0,0.8)',
+          titleFont: { family: 'Google Sans', size: 14 },
+          bodyFont: { family: 'Google Sans' },
+          padding: 12,
+          callbacks: { label: (c) => `${c.dataset.label}: ${formatMinutes(c.raw)}` }
         }
       },
       scales: {
-        x: { grid: { display: false }, ticks: { font: { weight: 'bold' } } },
+        x: { grid: { display: false }, ticks: { font: { family: 'Google Sans', weight: 'bold' } } },
         y: { 
           beginAtZero: true, 
-          grid: { color: '#eee' }, 
-          ticks: { 
-            font: { weight: 'bold' },
-            callback: (v) => formatMinutes(v)
-          } 
+          grid: { color: '#f0f0f2' },
+          ticks: { font: { family: 'Google Sans' }, callback: (v) => formatMinutes(v) }
         }
       }
     }
@@ -473,61 +535,60 @@ function updateChart(rows) {
 }
 
 async function load() {
-  const params = new URLSearchParams({
-    period,
-    tz: $('tz').value,
-    dimension: $('dimension').value
-  });
+  const params = new URLSearchParams({ period, tz: $('tz').value, dimension: $('dimension').value });
   if (period === 'custom') {
     params.set('start', $('start').value);
     params.set('end', $('end').value);
   }
 
   try {
-    const res = await fetch(API + '?' + params, {
-      headers: { 'x-dashboard-password': dashPass }
-    });
-
-    if (res.status === 401) {
-      $('login').classList.remove('hidden');
-      return;
-    }
-
-    const d = await res.json();
-    const s = d.summary;
+    const res = await fetch(API + '?' + params, { headers: { 'x-dashboard-password': dashPass } });
+    if (res.status === 401) { $('login').classList.remove('hidden'); return; }
+    
+    currentData = await res.json();
+    const s = currentData.summary;
 
     $('login').classList.add('hidden');
     $('hoursVal').textContent = nf.format(Math.round(s.total_minutes / 60));
     $('plays').textContent = nf.format(s.total_plays);
     $('tracks').textContent = nf.format(s.distinct_tracks);
     $('last').textContent = s.last_listen ? new Date(s.last_listen).toLocaleDateString() : '—';
-    $('rangeLabel').textContent = (periods.find(x => x[0] === period)?.[1] || 'CUSTOM').toUpperCase();
+    $('rangeLabel').textContent = (periods.find(x => x[0] === period)?.[1] || 'CUSTOM');
 
-    renderCovers(d.topTracks);
-    renderList('artists', d.topArtists);
-    renderList('tracksList', d.topTracks);
-    renderList('albums', d.topAlbums);
-    renderList('subgenres', d.topSubgenres);
+    renderHero(currentData.topTracks);
+    updateChart(currentData.graph.rows || []);
     
-    $('genres').innerHTML = (d.topGenres || []).map(r => 
-      `<span class="pill">${esc(r.label)} ${formatMinutes(r.minutes)}</span>`
-    ).join('');
+    refreshDisplays();
 
-    updateChart(d.graph.rows || []);
-
-    $('recent').innerHTML = (d.recent || []).map(r => `
+    $('recent').innerHTML = (currentData.recent || []).map(r => `
       <tr>
-        <td style="white-space: nowrap">${new Date(r.listened_at).toLocaleString()}</td>
+        <td style="color: var(--muted); font-size: 12px;">${new Date(r.listened_at).toLocaleString()}</td>
         <td><strong>${esc(r.track_name)}</strong></td>
         <td>${esc(r.artist_name)}</td>
         <td style="color: var(--muted)">${esc(r.album_name)}</td>
       </tr>
     `).join('');
 
-  } catch (err) {
-    console.error(err);
-  }
+  } catch (err) { console.error(err); }
 }
+
+function refreshDisplays() {
+  if (!currentData) return;
+  renderSection('artists', currentData.topArtists);
+  renderSection('tracks', currentData.topTracks);
+  renderSection('albums', currentData.topAlbums);
+  renderSection('genres', currentData.topGenres);
+}
+
+document.querySelectorAll('.view-toggle').forEach(btn => {
+  btn.onclick = () => {
+    const section = btn.parentElement.dataset.section;
+    const mode = btn.dataset.mode;
+    viewModes[section] = mode;
+    btn.parentElement.querySelectorAll('.view-toggle').forEach(b => b.classList.toggle('active', b === btn));
+    refreshDisplays();
+  };
+});
 
 $('loginForm').onsubmit = e => {
   e.preventDefault();
