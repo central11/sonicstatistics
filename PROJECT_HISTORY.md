@@ -20,6 +20,7 @@ A Vignelli-inspired (Swiss International Style) dashboard for personal Spotify l
 - **Data Performance:** Optimized the `sonic_dashboard_payload` RPC to support "ALL TIME" queries by streamlining genre taxonomy joins, reducing response times from 10s+ (timeout) to ~2.3s.
 - **Graph Granularity:** Adjusted graph bucket logic to prefer monthly views for ranges exceeding 60 days (ensuring "This Year" uses months).
 - **Header Polish:** Simplified header "deck" text to "AUDIO ARCHIVE" per user request.
+- **Data Cleanup:** Removed the "Source" (device) column from the dashboard and updated the RPC to strictly filter out null data series from all charts and tables.
 
 ## Technical Decisions
 - **Color Extraction:** Real-time extraction of dominant colors from album art via `canvas` to style UI elements dynamically.
